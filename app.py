@@ -4,6 +4,9 @@ import pandas as pd
 import plotly.express as px
 from dash import Dash, dcc, html
 from sqlalchemy import create_engine, text
+from dotenv import load_dotenv
+
+load_dotenv()
 
 engine = create_engine(os.environ["SEDIA_DB_URL"])
 
