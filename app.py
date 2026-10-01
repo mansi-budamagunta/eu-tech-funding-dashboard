@@ -128,6 +128,28 @@ funding = funding_summary(funded).assign(
 trends = funding_summary(funded.dropna(subset=["start_year"]), ["start_year"])
 
 order = list(QUESTION_LABELS.values())
+
+funded = complete.dropna(subset=["eu_contribution"]).assign(
+    positive_funding=lambda x: x.label * x.eu_contribution
+)
+
+unweighted = (
+    funded.groupby("question_id", as_index=False)
+    .agg(
+        positive_count=("label", "sum"),
+        funded_project_count=("reference", "nunique"),
+        positive_share=("label", "mean"),
+    )
+    .assign(
+        question=lambda x: x.question_id.map(QUESTION_LABELS),
+        result_label=lambda x:
+            x.positive_count.astype(int).astype(str)
+            + " / "
+            + x.funded_project_count.astype(str),
+    )
+)
+
+
 unweighted_figure = px.bar(
     unweighted, x="question", y="positive_share", text="result_label",
     category_orders={"question": order}, range_y=[0, 1],
@@ -135,14 +157,15 @@ unweighted_figure = px.bar(
     labels={"positive_share": "Positive share", "question": "Question"},
 )
 unweighted_figure.update_traces(
-    customdata=unweighted[["positive_count", "annotated_count"]],
+    customdata=unweighted[["positive_count", "funded_project_count"]],
     hovertemplate=(
         "<b>%{x}</b><br>"
         "Positive projects: %{customdata[0]:,.0f}<br>"
-        "Fully annotated projects: %{customdata[1]:,.0f}<br>"
+        "Projects with funding data: %{customdata[1]:,.0f}<br>"
         "Positive share: %{y:.1%}<extra></extra>"
     ),
 )
+
 funding_figure = px.bar(
     funding, x="question", y="positive_funding_share", text="result_label",
     category_orders={"question": order}, range_y=[0, 1],
@@ -160,16 +183,28 @@ funding_figure.update_traces(
         "Funding-weighted share: %{y:.1%}<extra></extra>"
     ),
 )
+
 trend_figure = px.line(
-    trends, x="start_year", y="positive_funding_share", facet_row="question",
-    markers=True, category_orders={"question": order}, range_y=[0, 1],
+    trends,
+    x="start_year",
+    y="positive_funding_share",
+    color="question",
+    markers=True,
+    category_orders={"question": order},
+    range_y=[0, 1],
     title="Funding-weighted positive share by project start year",
-    labels={"start_year": "Start year", "positive_funding_share": "Share of EU contribution"},
-    height=750,
+    labels={
+        "start_year": "Start year",
+        "positive_funding_share": "Share of EU contribution",
+        "question": "Question",
+    },
+    height=500,
 )
+trend_figure.update_xaxes(dtick=1, tickformat="d")
+
+
 for fig in (unweighted_figure, funding_figure, trend_figure):
     fig.update_yaxes(tickformat=".0%")
-trend_figure.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
 
 app = Dash(__name__)
 server = app.server
@@ -200,13 +235,14 @@ app.layout = html.Div(
             [
                 metric("Total HORIZON-CL4 projects"),
                 metric("Fully annotated projects"),
-                metric("Not yet fully annotated projects"),
+                # metric("Not yet fully annotated projects"),
                 metric("Fully annotated projects with funding"),
             ],
             style={"display": "flex", "gap": "1rem", "flexWrap": "wrap"},
         ),
         dcc.Graph(figure=unweighted_figure),
         dcc.Graph(figure=funding_figure),
+        dcc.Graph(figure=trend_figure),
         html.P(
             "Funding-weighted results use EU contribution and exclude projects "
             "without a usable funding value."
