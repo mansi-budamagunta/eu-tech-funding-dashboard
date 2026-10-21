@@ -3,7 +3,7 @@ pandas
 plotly
 SQLAlchemy
 python-dotenv
-psycopg2-binary
+psycopg
 gunicorn
 beautifulsoup4
 httpx
