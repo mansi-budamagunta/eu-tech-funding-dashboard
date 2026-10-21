@@ -24,7 +24,7 @@ Related repository:
 git clone https://github.com/mansi-budamagunta/eu-tech-funding-dashboard.git
 cd eu-tech-funding-dashboard
 
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
