@@ -206,7 +206,7 @@ trend_figure.update_xaxes(dtick=1, tickformat="d")
 for fig in (unweighted_figure, funding_figure, trend_figure):
     fig.update_yaxes(tickformat=".0%")
 
-app = Dash(__name__)
+app = Dash(__name__, title="EU Tech Funding Dashboard")
 server = app.server
 
 def metric(label):
