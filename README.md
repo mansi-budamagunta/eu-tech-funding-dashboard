@@ -43,15 +43,19 @@ pip install -r requirements.txt
 The dashboard requires an existing PostgreSQL database containing the project
 and annotation data.
 
-Provide its SQLAlchemy connection URL through `SEDIA_DB_URL`. It can be set in
-the environment or in a `.env` file in the repository root:
+Provide its SQLAlchemy connection URL through `SEDIA_DB_URL`. It can be set in a `.env` file in the repository root:
 
 ```text
 SEDIA_DB_URL=postgresql+psycopg://username:password@localhost:5432/database_name
 ```
 
-The database account only needs read access to the tables used by the
-dashboard.
+Alternatively, set it in the shell:
+
+```bash
+export SEDIA_DB_URL="postgresql+psycopg://username:password@localhost:5432/database_name"
+```
+
+The database account only needs read access to the tables used by the dashboard.
 
 ## Run locally
 
