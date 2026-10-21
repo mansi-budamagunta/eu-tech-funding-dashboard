@@ -43,11 +43,11 @@ QUESTIONS = {
 project_sql = text("""
     SELECT DISTINCT ON (reference)
         reference::text AS reference,
-        metadata::jsonb #>> '{callIdentifier,0}' AS call_identifier,
-        metadata::jsonb #>> '{euContributionAmount,0}' AS eu_contribution,
-        metadata::jsonb #>> '{startDate,0}' AS start_date
+        "metadata_callIdentifier" AS call_identifier,
+        "metadata_euContributionAmount" AS eu_contribution,
+        "metadata_startDate" AS start_date
     FROM raw_projects
-    WHERE metadata::jsonb #>> '{callIdentifier,0}' LIKE 'HORIZON-CL4%'
+    WHERE "metadata_callIdentifier" LIKE 'HORIZON-CL4%'
     ORDER BY reference
 """)
 annotation_sql = text("""
@@ -228,8 +228,39 @@ app.layout = html.Div(
     [
         html.H1("HORIZON-CL4 project annotations"),
         html.P(
-            f"Exploratory model-generated annotations using {MODEL} / {PROMPT_VERSION}. "
-            "These labels have not yet been manually validated."
+            [
+                "This dashboard investigates how projects funded under Horizon Europe’s ",
+                html.A(
+                    "Cluster 4: Digital, Industry and Space",
+                    href=(
+                        "https://research-and-innovation.ec.europa.eu/funding/"
+                        "funding-opportunities/funding-programmes-and-open-calls/"
+                        "horizon-europe/cluster-4-digital-industry-and-space_en"
+                    ),
+                    target="_blank",
+                ),
+                " align with the EU’s technological sovereignty goals.",
+            ]
+        ),
+        html.P(
+                    f"Exploratory model-generated annotations using {MODEL} / {PROMPT_VERSION}. "
+                    "These labels have not yet been manually validated."
+                ),
+        html.P(
+            [
+                "Source repositories: ",
+                html.A(
+                    "dashboard",
+                    href="https://github.com/mansi-budamagunta/eu-tech-funding-dashboard",
+                    target="_blank",
+                ),
+                " · ",
+                html.A(
+                    "data ingestion",
+                    href="https://github.com/mansi-budamagunta/sedia-api-fetchers",
+                    target="_blank",
+                ),
+            ]
         ),
         html.Div(
             [
